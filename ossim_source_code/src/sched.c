@@ -8,6 +8,12 @@
 static struct queue_t ready_queue;
 static struct queue_t run_queue;
 static pthread_mutex_t queue_lock;
+int slot_cpu_can_use[MAX_PRIO];
+// int prioSlot[MAX_PRIO];
+
+int MarkedPrior = 0 ;
+int flag = 1;
+int count = 0;
 
 #ifdef MLQ_SCHED
 static struct queue_t mlq_ready_queue[MAX_PRIO];
@@ -27,8 +33,11 @@ void init_scheduler(void) {
 #ifdef MLQ_SCHED
     int i ;
 
-	for (i = 0; i < MAX_PRIO; i ++)
+	for (i = 0; i < MAX_PRIO; i++) {
 		mlq_ready_queue[i].size = 0;
+		// prioSlot[i] = MAX_PRIO - i;
+		slot_cpu_can_use[i] = MAX_PRIO - i;
+	}
 #endif
 	ready_queue.size = 0;
 	run_queue.size = 0;
@@ -43,11 +52,81 @@ void init_scheduler(void) {
  *  State representation   prio = 0 .. MAX_PRIO, curr_slot = 0..(MAX_PRIO - prio)
  */
 struct pcb_t * get_mlq_proc(void) {
-	struct pcb_t * proc = NULL;
+	// struct pcb_t * proc = NULL;
+	// /*TODO: get a process from PRIORITY [ready_queue].
+	//  * Remember to use lock to protect the queue.
+	//  * */
+	// pthread_mutex_lock(&queue_lock);
+	// label: 
+	// if(flag){
+	// 	for(; MarkedPrior < MAX_PRIO; MarkedPrior++){
+	// 		if(mlq_ready_queue[MarkedPrior].size != 0 && prioSlot[MarkedPrior] < MAX_PRIO - MarkedPrior){
+	// 			proc = dequeue(&mlq_ready_queue[MarkedPrior]);
+	// 			prioSlot[MarkedPrior]++;
+	// 			flag = 0;
+	// 			count = 0;
+	// 			pthread_mutex_unlock(&queue_lock);
+	// 			return proc;
+	// 		}
+	// 		count++;
+	// 	}
+	// 	for(int j = 0; j < MAX_PRIO; j++){
+	// 		prioSlot[j] = 0;
+	// 	}
+	// 	MarkedPrior = 0;
+	// 	flag = 1;
+	// 	if(count == MAX_PRIO){
+	// 		pthread_mutex_unlock(&queue_lock);
+	// 		return proc;
+	// 	}else{
+	// 		count = 0;
+	// 	}
+	// 	printf("yoyo\n");
+	// 	goto label;
+	// }else{
+	// 	if(prioSlot[MarkedPrior] < MAX_PRIO - MarkedPrior && mlq_ready_queue[MarkedPrior].size != 0 ){
+	// 		printf("Inside priorSlot, second if block\n");
+	// 		proc = dequeue(&mlq_ready_queue[MarkedPrior]);
+	// 		prioSlot[MarkedPrior]++;
+	// 		pthread_mutex_unlock(&queue_lock);
+	// 		return proc;
+	// 	}else{
+	// 		flag = 1;
+	// 		goto label;
+	// 	}
+	// }
+	// pthread_mutex_unlock(&queue_lock);
+	// return proc;	
+	// struct pcb_t * proc = NULL;
 	/*TODO: get a process from PRIORITY [ready_queue].
 	 * Remember to use lock to protect the queue.
 	 * */
-	return proc;	
+	pthread_mutex_lock(&queue_lock);
+
+	struct pcb_t *proc = NULL;
+
+	static unsigned long curr_prio = 0;
+	unsigned long count = 0;
+	while (count < MAX_PRIO)
+	{
+		unsigned long prio_idx = (curr_prio + count) % MAX_PRIO;
+
+        if (!empty(&mlq_ready_queue[prio_idx]) && slot_cpu_can_use[prio_idx] > 0) {
+
+            proc = dequeue(&mlq_ready_queue[prio_idx]);
+
+            if (proc != NULL) {
+                slot_cpu_can_use[prio_idx]--;
+                curr_prio = prio_idx;
+                pthread_mutex_unlock(&queue_lock);
+                return proc;
+            }
+        }
+        count++;
+	}
+
+	pthread_mutex_unlock(&queue_lock);
+	return NULL;
 }
 
 void put_mlq_proc(struct pcb_t * proc) {
