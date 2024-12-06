@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "mm.h": "c",
+        "common.h": "c",
+        "bitops.h": "c",
+        "type_traits": "c",
+        "mem.h": "c"
+    }
+}
