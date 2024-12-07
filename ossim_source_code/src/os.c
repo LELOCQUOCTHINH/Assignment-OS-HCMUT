@@ -100,6 +100,7 @@ static void * cpu_routine(void * args) {
 	}
 	detach_event(timer_id);
 	pthread_exit(NULL);
+	return NULL;
 }
 
 static void * ld_routine(void * args) {
@@ -143,6 +144,7 @@ static void * ld_routine(void * args) {
 	done = 1;
 	detach_event(timer_id);
 	pthread_exit(NULL);
+	return NULL;
 }
 
 static void read_config(const char * path) {
@@ -152,6 +154,7 @@ static void read_config(const char * path) {
 		exit(1);
 	}
 	fscanf(file, "%d %d %d\n", &time_slot, &num_cpus, &num_processes);
+	printf("time_slot: %d, num_cpus: %d, num_processes: %d\n", time_slot, num_cpus, num_processes);
 	ld_processes.path = (char**)malloc(sizeof(char*) * num_processes);
 	ld_processes.start_time = (unsigned long*)
 		malloc(sizeof(unsigned long) * num_processes);
@@ -168,7 +171,7 @@ static void read_config(const char * path) {
 	for(sit = 1; sit < PAGING_MAX_MMSWP; sit++)
 		memswpsz[sit] = 0;
 #ifdef MM_PAGING_HEAP_GODOWN
-	vmemsz = 0x300000
+	vmemsz = 0x300000;
 #endif
 #else
 	/* Read input config of memory size: MEMRAM and upto 4 MEMSWP (mem swap)
@@ -177,12 +180,12 @@ static void read_config(const char * path) {
 	*/
 	fscanf(file, "%d\n", &memramsz);
 	for(sit = 0; sit < PAGING_MAX_MMSWP; sit++)
-		fscanf(file, "%d", &(memswpsz[sit])); 
-#ifdef MM_PAGIMG_HEAP_GODOWN
+		fscanf(file, "%d", &(memswpsz[sit]));
+#ifdef MM_PAGING_HEAP_GODOWN
 	fscanf(file, "%d\n", &vmemsz);
-#endif
+#endif 
 
-       fscanf(file, "\n"); /* Final character */
+	fscanf(file, "\n"); /* Final character */
 #endif
 #endif
 
