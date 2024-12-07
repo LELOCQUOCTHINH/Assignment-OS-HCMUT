@@ -20,7 +20,7 @@ static int timer_stop = 0;
 
 static void * timer_routine(void * args) {
 	while (!timer_stop) {
-		printf("Time slot %3lu\n", current_time());
+		printf("Time slot %3llu\n", current_time());
 		int fsh = 0;
 		int event = 0;
 		/* Wait for all devices have done the job in current
@@ -56,6 +56,7 @@ static void * timer_routine(void * args) {
 		}
 	}
 	pthread_exit(args);
+	return args;
 }
 
 void next_slot(struct timer_id_t * timer_id) {
