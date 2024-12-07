@@ -182,7 +182,7 @@ static void read_config(const char * path) {
 	for(sit = 0; sit < PAGING_MAX_MMSWP; sit++)
 		fscanf(file, "%d", &(memswpsz[sit]));
 #ifdef MM_PAGING_HEAP_GODOWN
-	fscanf(file, "%d\n", &vmemsz);
+	fscanf(file, "%d", &vmemsz);
 #endif 
 
 	fscanf(file, "\n"); /* Final character */
