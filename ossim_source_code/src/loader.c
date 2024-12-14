@@ -86,6 +86,13 @@ struct pcb_t * load(const char * path) {
 			fscanf(file, "%u\n", &proc->code->text[i].arg_0);
 			break;
 		case READ:
+			fscanf(
+				file,
+				"%u %u %u\n",
+				&proc->code->text[i].arg_0,
+				&proc->code->text[i].arg_1,
+				&proc->code->text[i].arg_2
+			);
 		case WRITE:
 			fscanf(
 				file,

@@ -6,6 +6,7 @@
 
 #include "mm.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 /*
  *  MEMPHY_mv_csr - move MEMPHY cursor
@@ -125,7 +126,7 @@ int MEMPHY_format(struct memphy_struct *mp, int pagesz)
     mp->free_fp_list = fst;
 
     /* We have list with first element, fill in the rest num-1 element member*/
-    for (iter = 1; iter < numfp ; iter++)
+    for (iter = 1; iter < numfp; iter++)
     {
        newfst =  malloc(sizeof(struct framephy_struct));
        newfst->fpn = iter;
@@ -155,8 +156,6 @@ int MEMPHY_get_freefp(struct memphy_struct *mp, int *retfpn)
    return 0;
 }
 
-#include <stdio.h>
-
 /* 
  * MEMPHY_dump - Dump the memory content of a memphy_struct
  * @mp: Pointer to the memphy_struct to be dumped
@@ -166,21 +165,24 @@ int MEMPHY_get_freefp(struct memphy_struct *mp, int *retfpn)
  */
 int MEMPHY_dump(struct memphy_struct *mp)
 {
-    if (!mp || !mp->storage) {
-        printf("Error: Invalid memphy_struct or storage is NULL.\n");
-        return -1; // Return an error code if the structure is invalid
-    }
+   if (!mp || !mp->storage || mp->maxsz == 0) {
+      printf("Error: Invalid memphy_struct or storage is NULL.\n");
+      return -1; // Return an error code if the structure is invalid
+   }
 
-    printf("MEMPHY Dump (Size: %d):\n", mp->maxsz);
-    for (int i = 0; i < mp->maxsz; i++) {
-        if (i % 16 == 0) {
-            printf("\n%08X: ", i); // Print address at the start of each line
-        }
-        printf("%02X ", (unsigned char)mp->storage[i]);
-    }
-    printf("\n"); // Newline after the last line of the dump
+   printf("MEMPHY Dump (Size: %d):\n", mp->maxsz);
+   for (int i = 0; i < mp->maxsz; i++) {
+      //   if (i % 16 == 0) {
+      //       printf("\n%08X: ", i); // Print address at the start of each line
+      //   }
+      //   printf("%02X ", (unsigned char)mp->storage[i]);
+      if (mp->storage[i] != 0) {
+         printf("%d: 0x%08llx\t\t0x%08x\n", i, (uintptr_t)(mp->storage + i), mp->storage[i]);
+      }
+   }
+   printf("\n"); // Newline after the last line of the dump
 
-    return 0; // Success
+   return 0; // Success
 }
 
 
