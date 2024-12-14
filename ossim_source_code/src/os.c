@@ -59,9 +59,9 @@ static void * cpu_routine(void * args) {
 		 	* ready queue */
 			proc = get_proc();
 			if (proc == NULL) {
-                           next_slot(timer_id);
-                           continue; /* First load failed. skip dummy load */
-                        }
+                next_slot(timer_id);
+                continue; /* First load failed. skip dummy load */
+            }
 		}else if (proc->pc == proc->code->size) {
 			/* The porcess has finish it job */
 			printf("\tCPU %d: Processed %2d has finished\n",
@@ -97,6 +97,7 @@ static void * cpu_routine(void * args) {
 		run(proc);
 		time_left--;
 		next_slot(timer_id);
+		printf("ngu\n");
 	}
 	detach_event(timer_id);
 	pthread_exit(NULL);
@@ -126,12 +127,18 @@ static void * ld_routine(void * args) {
 		proc->mm = malloc(sizeof(struct mm_struct));
 #ifdef MM_PAGING_HEAP_GODOWN
 		proc->vmemsz = vmemsz;
+		printf("ngu1\n");
 #endif
 		init_mm(proc->mm, proc);
 		proc->mram = mram;
 		proc->mswp = mswp;
 		proc->active_mswp = active_mswp;
 #endif
+		// if(ld_processes.path[i] == NULL) printf("cc1\n");
+		// printf("%s\n", ld_processes.path[i]);
+		// if(proc == NULL) printf("cc2\n");
+		// printf("%d\n", proc->pid);
+		// printf("%ld\n", ld_processes.prio[i]);
 		printf("\tLoaded a process at %s, PID: %d PRIO: %ld\n",
 			ld_processes.path[i], proc->pid, ld_processes.prio[i]);
 		add_proc(proc);
@@ -179,10 +186,13 @@ static void read_config(const char * path) {
 	 *        MEM_RAM_SZ MEM_SWP0_SZ MEM_SWP1_SZ MEM_SWP2_SZ MEM_SWP3_SZ
 	*/
 	fscanf(file, "%d\n", &memramsz);
-	for(sit = 0; sit < PAGING_MAX_MMSWP; sit++)
+	printf("memramsz: %d\n", memramsz);
+	for(sit = 0; sit < PAGING_MAX_MMSWP; sit++){
 		fscanf(file, "%d", &(memswpsz[sit]));
+		printf("memswpsz: %d\n", memswpsz[sit]);}
 #ifdef MM_PAGING_HEAP_GODOWN
-	fscanf(file, "%d\n", &vmemsz);
+	fscanf(file, "%d", &vmemsz);
+	printf("vmemsz: %d\n", vmemsz);
 #endif 
 
 	fscanf(file, "\n"); /* Final character */
@@ -201,6 +211,7 @@ static void read_config(const char * path) {
 		char proc[100];
 #ifdef MLQ_SCHED
 		fscanf(file, "%lu %s %lu\n", &ld_processes.start_time[i], proc, &ld_processes.prio[i]);
+		printf("DEBUG: Process - Start time: %lu, Name: %s, Priority: %lu\n", ld_processes.start_time[i], proc, ld_processes.prio[i]);
 #else
 		fscanf(file, "%lu %s\n", &ld_processes.start_time[i], proc);
 #endif

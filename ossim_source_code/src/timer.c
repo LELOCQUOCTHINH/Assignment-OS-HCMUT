@@ -43,7 +43,6 @@ static void * timer_routine(void * args) {
 
 		/* Increase the time slot */
 		_time++;
-		
 		/* Let devices continue their job */
 		for (temp = dev_list; temp != NULL; temp = temp->next) {
 			pthread_mutex_lock(&temp->id.timer_lock);
